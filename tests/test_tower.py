@@ -288,8 +288,9 @@ proxied = true
         self.assertEqual(secrets["CLOUDFLARE_ACCOUNT_ID"], ACCOUNT)
         vars_ = {c["args"][2] for c in calls if c["args"][:2] == ["variable", "set"]}
         self.assertEqual(vars_, {"CF_KV_OTTER_CACHE_ID", "CF_D1_OTTER_DB_ID"})
-        # トークンの値がログに出ていない
-        self.assertNotIn(toks[0]["value"], out)
+        # トークンの値がログに出ていない（伏せ字の指示行 ::add-mask:: は除く）
+        shown = "\n".join(l for l in out.splitlines() if not l.startswith("::add-mask::"))
+        self.assertNotIn(toks[0]["value"], shown)
 
         # 2回目は何も増えない
         before = toks[0]["id"]
