@@ -74,6 +74,9 @@ https://github.com/kajisho5/tower/actions/workflows/apply.yml を開き、右の
 4. アプリのリポに `examples/deploy-workers.yml`（Pages なら `examples/deploy-pages.yml`）を
    `.github/workflows/deploy.yml` として置く → main に反映するたびに公開されます
 
+ビルドのたびに取り直すと重いデータ（取得済みのファイルなど）は、`with:` に `cache-path`（置き場所）と
+`cache-key`（名前）を足すと次回に持ち越せます（月が変わると保存し直します）。
+
 作った KV・D1 の ID は、アプリのリポの Variables に `CF_KV_名前_ID` / `CF_D1_名前_ID` として入ります。
 
 ### 使える権限のあだ名

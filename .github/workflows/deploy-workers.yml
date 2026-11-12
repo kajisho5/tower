@@ -9,6 +9,9 @@ on:
       install-command: { type: string, default: "npm ci" }
       build-command: { type: string, default: "" }
       command: { type: string, default: "deploy" }
+      # ビルドで使う取得済みデータなどを次回に持ち越したいとき（省略可）。月が変わると保存し直す
+      cache-path: { type: string, default: "" }
+      cache-key: { type: string, default: "" }
     secrets:
       CLOUDFLARE_API_TOKEN: { required: true }
       CLOUDFLARE_ACCOUNT_ID: { required: true }
@@ -21,6 +24,18 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with: { node-version: "${{ inputs.node-version }}" }
+      - name: 持ち越しデータの月を決める
+        id: ym
+        if: ${{ inputs.cache-path != '' }}
+        run: echo "ym=$(date -u +%Y%m)" >> "$GITHUB_OUTPUT"
+      - name: 持ち越しデータを戻す
+        if: ${{ inputs.cache-path != '' }}
+        uses: actions/cache@v5
+        with:
+          path: ${{ inputs.cache-path }}
+          key: ${{ inputs.cache-key }}-${{ steps.ym.outputs.ym }}
+          restore-keys: |
+            ${{ inputs.cache-key }}-
       - name: 準備
         if: ${{ inputs.install-command != '' && hashFiles(format('{0}/package.json', inputs.working-directory)) != '' }}
         working-directory: ${{ inputs.working-directory }}
