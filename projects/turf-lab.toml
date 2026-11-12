@@ -1,0 +1,10 @@
+# SW TURF LAB（競馬予想ページ・自動投稿）
+# 公開先: Worker「kajikeiba-turf」（seventh-well.com/odds・/lab）と「kajikeiba-autopost」
+repo = "kajisho5/turf-lab"
+
+# workers        … 2つの Worker の公開
+# workers_routes … seventh-well.com/odds* と /lab* へのつなぎ込み
+# d1             … 既存のデータベース「kajikeiba」の読み書き（tower では新しく作らない）
+permissions = ["workers", "workers_routes", "d1"]
+zones = ["seventh-well.com"]
+expires_days = 90
