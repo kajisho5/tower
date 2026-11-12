@@ -1,0 +1,27 @@
+# 毎週月曜 9:17（日本時間）に期限を見張り、近いトークンは作り直す
+name: watch
+on:
+  schedule:
+    - cron: "17 0 * * 1"
+  workflow_dispatch:
+concurrency: { group: tower, cancel-in-progress: false }
+permissions: { contents: read, issues: write }
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - name: 見張り
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GH_TOKEN: ${{ secrets.TOWER_GITHUB_TOKEN }}
+          TOWER_PROBLEMS_FILE: ${{ runner.temp }}/problems.md
+        run: python3 tools/tower.py watch
+      - name: 困ったことがあれば知らせる（Issue を作る）
+        if: failure()
+        uses: ./.github/actions/notify
+        with:
+          title: "tower: 期限の見張りで要対応があります"
+          problems: ${{ runner.temp }}/problems.md

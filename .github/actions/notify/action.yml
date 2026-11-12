@@ -1,0 +1,23 @@
+name: notify
+description: 困ったことを Issue にまとめる（同じ題名の Issue が開いていればコメントを足す）
+inputs:
+  title: { required: true }
+  problems: { required: true }
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TITLE: ${{ inputs.title }}
+        PROBLEMS: ${{ inputs.problems }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        body="$( [ -s "$PROBLEMS" ] && cat "$PROBLEMS" || echo '- 詳しくは実行記録を見てください' )"
+        body="$body"$'\n\n'"実行記録: $RUN_URL"
+        num="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$TITLE\" in:title" --json number -q '.[0].number')"
+        if [ -n "$num" ]; then
+          gh issue comment "$num" --repo "$GITHUB_REPOSITORY" --body "$body"
+        else
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body "$body"
+        fi

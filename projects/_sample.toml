@@ -1,0 +1,44 @@
+# 書き方の見本です。ファイル名が _ で始まるものは反映されません。
+# 新しいアプリを足すときは、このファイルを「リポ名.toml」として複製し、中身を書き換えてください。
+# 名前やドメインはすべて架空のものです。
+
+# 配布先のリポ（持ち主/リポ名）
+repo = "kajisho5/sample-otter-app"
+
+# このアプリのトークンに付ける権限（あだ名、または Cloudflare の正式な権限名）
+#   workers        … Workers の公開
+#   workers_routes … Workers をドメインにつなぐ（zones が必要）
+#   pages          … Pages の公開
+#   kv / d1 / r2   … それぞれのデータの読み書き
+#   dns            … DNS の書き換え（zones が必要）
+permissions = ["workers", "kv", "d1"]
+
+# dns や workers_routes の権限をかけるドメイン
+zones = []
+
+# トークンの有効日数（期限の 21 日前になると自動で作り直します）
+expires_days = 90
+
+# 配布先リポに入れる Secrets の名前（省略するとこの名前）
+# secret_token = "CLOUDFLARE_API_TOKEN"
+# secret_account = "CLOUDFLARE_ACCOUNT_ID"
+
+# 用意しておくデータ置き場。作ったものの ID は配布先リポの Variables に
+# CF_KV_<名前>_ID / CF_D1_<名前>_ID として入ります（記号は _ に変わります）。
+[[kv]]
+title = "sample-otter-cache"
+
+[[d1]]
+name = "sample-otter-db"
+# location = "apac"   # 置き場所の希望（省略可）
+
+# [[r2]]
+# name = "sample-otter-files"
+
+# DNS レコード（tower 側で作るので、アプリのトークンに dns 権限は要りません）
+# [[dns]]
+# zone = "example.com"
+# type = "CNAME"
+# name = "otter"              # otter.example.com。ドメインそのものは "@"
+# content = "sample-otter-app.example.workers.dev"
+# proxied = true

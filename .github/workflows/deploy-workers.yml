@@ -1,0 +1,38 @@
+# 各リポから呼び出す共通の Workers 公開ワークフロー
+# 呼び出し方は examples/deploy-workers.yml を参照
+name: deploy-workers
+on:
+  workflow_call:
+    inputs:
+      working-directory: { type: string, default: "." }
+      node-version: { type: string, default: "22" }
+      install-command: { type: string, default: "npm ci" }
+      build-command: { type: string, default: "" }
+      command: { type: string, default: "deploy" }
+    secrets:
+      CLOUDFLARE_API_TOKEN: { required: true }
+      CLOUDFLARE_ACCOUNT_ID: { required: true }
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions: { contents: read }
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with: { node-version: "${{ inputs.node-version }}" }
+      - name: 準備
+        if: ${{ inputs.install-command != '' && hashFiles(format('{0}/package.json', inputs.working-directory)) != '' }}
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.install-command }}
+      - name: ビルド
+        if: ${{ inputs.build-command != '' }}
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.build-command }}
+      - name: 公開
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: ${{ inputs.working-directory }}
+          command: ${{ inputs.command }}
