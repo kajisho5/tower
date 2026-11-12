@@ -39,7 +39,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Cloudflare は権限名を Edit / Write の両方で表記していることがあるため、両方を候補に入れている。
 # 第2要素はかかる範囲: account（アカウント全体）か zone（指定したドメインだけ）。
 PRESETS: dict[str, tuple[list[list[str]], str]] = {
-    "workers": ([["Workers Scripts Write", "Workers Scripts Edit", "Workers Admin"],
+    # 新しい Worker を初めて作るときは Workers Admin が要る（Editor や旧来の Scripts Write は既存のものだけ）
+    "workers": ([["Workers Admin", "Workers Scripts Write", "Workers Scripts Edit"],
                  ["Account Settings Read"]], "account"),
     "workers_routes": ([["Workers Routes Write", "Workers Routes Edit"]], "zone"),
     "pages": ([["Pages Write", "Pages Edit", "Cloudflare Pages Write", "Cloudflare Pages Edit"],
@@ -95,6 +96,8 @@ def validate_project(p: dict) -> list[str]:
     repo = p.get("repo")
     if not isinstance(repo, str) or not REPO_RE.match(repo):
         errs.append(f"{f}: repo は「持ち主/リポ名」の形で書いてください")
+    elif repo == os.environ.get("GITHUB_REPOSITORY", "kajisho5/tower"):
+        errs.append(f"{f}: tower 自身を配布先にはできません（親トークンが上書きされます）")
     perms = p.get("permissions", [])
     if not isinstance(perms, list) or not all(isinstance(x, str) for x in perms):
         errs.append(f"{f}: permissions は文字の並び（例: [\"workers\", \"kv\"]）で書いてください")

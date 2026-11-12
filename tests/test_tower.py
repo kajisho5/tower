@@ -267,6 +267,12 @@ proxied = true
         self.assertIn("wrokers", out)
         self.assertIn("1〜365", out)
 
+    def test_tower_itself_is_refused(self):
+        self.project("self.toml", 'repo = "kajisho5/tower"\npermissions = ["workers"]\n')
+        code, out = self.run_tower("validate")
+        self.assertEqual(code, 1)
+        self.assertIn("tower 自身", out)
+
     def test_apply_creates_everything_once(self):
         self.project("otter.toml", self.BASIC)
         code, out = self.run_tower("apply")
