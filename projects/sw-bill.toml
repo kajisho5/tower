@@ -1,0 +1,17 @@
+# SW BILL（freee の請求書・見積書・納品書を SEVENTHWELL のデザインの PDF にするツール）
+# 公開先: Worker「sw-bill」（bill.seventh-well.com）
+repo = "kajisho5/sw-bill"
+
+# workers        … Worker の公開（保存箱の Durable Object を含む）
+# workers_routes … bill.seventh-well.com へのつなぎ込み
+permissions = ["workers", "workers_routes"]
+zones = ["seventh-well.com"]
+expires_days = 90
+
+# bill.seventh-well.com を Cloudflare 経由にするための目印（行き先は Worker が受ける）
+[[dns]]
+zone = "seventh-well.com"
+type = "AAAA"
+name = "bill"
+content = "100::"
+proxied = true
